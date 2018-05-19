@@ -48,7 +48,7 @@ func main() {
 
 ---
 
-This code is NOOP :-(
+This code is NOOP😩
 
 ---
 
@@ -84,6 +84,14 @@ Hello
 Hello
 Hello
 ```
+
+---
+
+### It's Concurrency👌
+
+---
+
+### High-performance Concurrency is ... ?
 
 ---
 
@@ -129,11 +137,44 @@ fatal error: all goroutines are asleep - deadlock!
 
 ---
 
+Why?🤔
+
+---
+
 ### Coffman Conditions
 
 - Mutual Exclusion: リソースは最大１つまでのプロセスにしか確保されないこと
 - Wait For Condition:  リソースが確保済みの場合、要求している他のプロセスは待たなければならない
 - No Preemption: リソースは確保したプロセスによってのみ解放される
 - Circular Wait: リソースを確保しているプロセスAが、他のリソースを確保しているプロセスBのリソースを要求することにより循環待ちが発生する
+
+これを全て満たすとDeadLockを引き起こす
+
+---
+
+### Other
+
+- LiveLock
+- Starvation
+- MemoryLeak
+- etc...
+
+Concurrencyでは考慮しなければならないことが多い👿
+
+---
+
+### High-performance Concurrency is safety💪 
+
+---
+
+### Concurrency Pattern
+
+- Confinement
+- Preventing Goroutine Leaks
+- Timeouts and Cancellation
+
+---
+
+### Confinement
 
 ---
