@@ -40,7 +40,7 @@ syossan27
 func main() {
   for i := 0; i < 10; i++ {
     go func() {
-      fmt.Println("Hello Concurrency")
+      fmt.Println("Hello")
     }()
   }
 }
@@ -87,7 +87,7 @@ Hello
 
 ---
 
-### Find mistake
+### Find mistake👀
 
 ---
 
@@ -96,7 +96,7 @@ func main() {
     type value struct {
         mu    sync.Mutex
         value int
-
+    }
 
     var wg sync.WaitGroup
     printSum := func(v1, v2 *value) {
@@ -120,5 +120,20 @@ func main() {
     wg.Wait()
 }
 ```
+
+---
+
+```
+fatal error: all goroutines are asleep - deadlock!
+```
+
+---
+
+### Coffman Conditions
+
+- Mutual Exclusion: リソースは最大１つまでのプロセスにしか確保されないこと
+- Wait For Condition:  リソースが確保済みの場合、要求している他のプロセスは待たなければならない
+- No Preemption: リソースは確保したプロセスによってのみ解放される
+- Circular Wait: リソースを確保しているプロセスAが、他のリソースを確保しているプロセスBのリソースを要求することにより循環待ちが発生する
 
 ---
