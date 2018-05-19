@@ -37,12 +37,10 @@ syossan27
 ---
 
 ```
-func main() {
-  for i := 0; i < 10; i++ {
-    go func() {
-      fmt.Println("Hello")
-    }()
-  }
+for i := 0; i < 10; i++ {
+  go func() {
+    fmt.Println("Hello")
+  }()
 }
 ```
 
@@ -57,17 +55,15 @@ This code is NOOP😩
 ---
 
 ```
-func main() {
-    var wg sync.WaitGroup
-    for i := 0; i < 10; i++ {
-        wg.Add(1)
-        go func() {
-            fmt.Println("Hello")
-            wg.Done()
-        }()
-    }
-    wg.Wait()
+var wg sync.WaitGroup
+for i := 0; i < 10; i++ {
+    wg.Add(1)
+    go func() {
+        fmt.Println("Hello")
+        wg.Done()
+    }()
 }
+wg.Wait()
 ```
 
 ---
@@ -100,33 +96,31 @@ Hello
 ---
 
 ```
-func main() {
-    type value struct {
-        mu    sync.Mutex
-        value int
-    }
-
-    var wg sync.WaitGroup
-    printSum := func(v1, v2 *value) {
-        defer wg.Done()
-
-        v1.mu.Lock()
-        defer v1.mu.Unlock()
-
-        time.Sleep(2 * time.Second)
-
-        v2.mu.Lock()
-        defer v2.mu.Unlock()
-
-        fmt.Printf("sum=%v\n", v1.value+v2.value)
-    }
-
-    var a, b value
-    wg.Add(2)
-    go printSum(&a, &b)
-    go printSum(&b, &a)
-    wg.Wait()
+type value struct {
+    mu    sync.Mutex
+    value int
 }
+
+var wg sync.WaitGroup
+printSum := func(v1, v2 *value) {
+    defer wg.Done()
+
+    v1.mu.Lock()
+    defer v1.mu.Unlock()
+
+    time.Sleep(2 * time.Second)
+
+    v2.mu.Lock()
+    defer v2.mu.Unlock()
+
+    fmt.Printf("sum=%v\n", v1.value+v2.value)
+}
+
+var a, b value
+wg.Add(2)
+go printSum(&a, &b)
+go printSum(&b, &a)
+wg.Wait()
 ```
 
 ---
@@ -176,5 +170,185 @@ Concurrencyでは考慮しなければならないことが多い👿
 ---
 
 ### Confinement
+
+---
+
+### Confinement
+
+goroutine内で使うデータに制限をかける手法   
+開発者の認知負荷の軽減や、小さなクリティカルセクションに対して効果がある
+
+---
+
+### Type
+
+- ad hoc
+- lexical
+
+---
+
+### adhoc
+
+チーム内での認識合意のみで実現する
+
+---
+
+```
+data := []int{1, 2, 3, 4}
+
+loopData := func(handleData chan<- int) {
+    defer close(handleData)
+    for i := range data {
+        handleData <- data[i]
+    }
+}
+
+handleData := make(chan int)
+go loopData(handleData)
+
+for num := range handleData {
+    fmt.Println(num)
+}
+```
+
+---
+
+### 🙅
+
+認識のみで縛る方法なので、非常に危険
+
+---
+
+### lexical
+
+レキシカルスコープを利用して、変数へのアクセスを制限する
+
+---
+
+```
+loopData := func(handleData chan<- int) {
+    defer close(handleData)
+    data := []int{1, 2, 3, 4}
+    for i := range data {
+        handleData <- data[i]
+    }
+}
+
+handleData := make(chan int)
+go loopData(handleData)
+for num := range handleData {
+    fmt.Println(num)
+}
+```
+
+---
+
+### 🙆
+
+クリティカルセクションも無くなり、認知負荷が軽減
+
+---
+
+### Preventing Goroutine Leaks
+
+goroutineがGCで解放されないパターンに対応する
+
+---
+
+### Paths to termination
+
+1. 処理の終了
+1. 回復不能なエラーの発生
+1. 処理の中止を受信
+
+1, 2はGCが動くが、3は動かない
+
+---
+
+### Leak Pattern
+
+```
+doWork := func(strings <-chan string) <-chan interface{} {
+    completed := make(chan interface{})
+    go func() {
+        defer fmt.Println("doWork exited.")
+        defer close(completed)
+        for s := range strings {
+            fmt.Println(s)
+        }
+    }()
+    return completed
+}
+doWork(nil)
+time.Sleep(5 * time.Second)
+fmt.Println("Done.")
+```
+
+---
+
+```
+doWork := func(strings <-chan string) <-chan interface{} {
+    completed := make(chan interface{})
+    go func() {
+        defer fmt.Println("doWork exited.")
+        defer close(completed)
+        for s := range strings {
+            fmt.Println(s)
+        }
+    }()
+    return completed
+}
+doWork(nil)
+time.Sleep(5 * time.Second)
+fmt.Println("Done.")
+```
+@[12](nil channelは読み込みも書き込みもブロッキングされる)
+
+---
+
+### If long lifecycle application...
+
+😥
+
+---
+
+### Parent goroutine manage child goroutine
+
+---
+
+```
+doWork := func(
+  done <-chan interface{},
+  strings <-chan string,
+) <-chan interface{} {
+    terminated := make(chan interface{})
+    go func() {
+        defer fmt.Println("doWork exited.")
+        defer close(terminated)
+        for {
+            select {
+            case s := <-strings:
+                // Do something interesting
+                fmt.Println(s)
+            case <-done:
+                return
+            }
+        }
+    }()
+    return terminated
+}
+
+done := make(chan interface{})
+terminated := doWork(done, nil)
+
+go func() {
+    time.Sleep(1 * time.Second)
+    fmt.Println("Canceling doWork goroutine...")
+    close(done)
+}()
+
+<-terminated
+fmt.Println("Done.")
+```
 
 ---
