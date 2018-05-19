@@ -65,6 +65,6 @@
   color: gray;
 }
 
-div.slides > section.present > p > em{
+div.slides > section.present > p > strong > em{
      text-align: left;
  }
