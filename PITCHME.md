@@ -32,7 +32,7 @@ syossan27
 
 ---
 
-#### Simple Concurrency
+### Simple Concurrency
 
 ---
 
@@ -48,10 +48,77 @@ func main() {
 
 ---
 
-This code is NOOP
+This code is NOOP :-(
 
 ---
 
-#### Simple Bad Concurrency
+### True Simple Concurrency
+
+---
+
+```
+func main() {
+    var wg sync.WaitGroup
+    for i := 0; i < 10; i++ {
+        wg.Add(1)
+        go func() {
+            fmt.Println("Hello")
+            wg.Done()
+        }()
+    }
+    wg.Wait()
+}
+```
+
+---
+
+```
+Hello
+Hello
+Hello
+Hello
+Hello
+Hello
+Hello
+Hello
+Hello
+Hello
+```
+
+---
+
+### Find mistake
+
+---
+
+```
+func main() {
+    type value struct {
+        mu    sync.Mutex
+        value int
+
+
+    var wg sync.WaitGroup
+    printSum := func(v1, v2 *value) {
+        defer wg.Done()
+
+        v1.mu.Lock()
+        defer v1.mu.Unlock()
+
+        time.Sleep(2 * time.Second)
+
+        v2.mu.Lock()
+        defer v2.mu.Unlock()
+
+        fmt.Printf("sum=%v\n", v1.value+v2.value)
+    }
+
+    var a, b value
+    wg.Add(2)
+    go printSum(&a, &b)
+    go printSum(&b, &a)
+    wg.Wait()
+}
+```
 
 ---
