@@ -64,7 +64,3 @@
 .reveal .slides section .code-presenting-annotation {
   color: gray;
 }
-
-div.slides > section.present > p > strong > em{
-     text-align: left;
- }
