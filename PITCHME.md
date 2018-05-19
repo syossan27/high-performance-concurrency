@@ -26,12 +26,6 @@ syossan27
 ***つまりConcurrencyは、「一度に多くのことを扱うこと」***   
 ***Parallelismは「一度にたくさんのことをすること」 ***
 
----
+---?image=assets/images/concurrency_parallelism1.png&size=auto 90%
 
-![ConcurrencyParallelism1](assets/images/concurrency_parallelism1.png)
-
----
-
-![ConcurrencyParallelism1](assets/images/concurrency_parallelism2.png)
-
----
+---?image=assets/images/concurrency_parallelism2.png&size=auto 90%
