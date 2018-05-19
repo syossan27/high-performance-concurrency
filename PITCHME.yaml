@@ -1,4 +1,3 @@
-
 theme : night
 
 layout : center-right
@@ -16,4 +15,3 @@ charts : true
 mathjax : TeX-AMS_HTML-full
 
 published : true
-
