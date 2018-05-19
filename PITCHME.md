@@ -1,14 +1,14 @@
-### High-performance concurrency
+#### High-performance concurrency
 
 syossan27
 
 ---
 
-### Concurrency is ... ?
+#### Concurrency is ... ?
 
 ---
 
-### Rob Pike says
+#### Rob Pike says
 
 ![RobPike](assets/robpike.jpg)
 
