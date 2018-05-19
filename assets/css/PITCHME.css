@@ -74,3 +74,7 @@ li {
 .reveal .slides section .code-presenting-annotation {
   color: gray;
 }
+
+ div.slides > section.present {
+     text-align: left;
+ }
