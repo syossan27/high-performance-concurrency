@@ -1,10 +1,10 @@
-#### High-performance concurrency
+### High-performance concurrency
 
 syossan27
 
 ---
 
-#### Concurrency is ... ?
+### Concurrency is ... ?
 
 ---
 
