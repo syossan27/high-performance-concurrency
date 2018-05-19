@@ -29,3 +29,17 @@ syossan27
 ---?image=assets/images/concurrency_parallelism1.png&size=auto 70%
 
 ---?image=assets/images/concurrency_parallelism2.png&size=auto 70%
+
+---
+
+### In Go
+
+```
+func main() {
+  go func() {
+    fmt.Println("Hello Concurrency")
+  }()
+}
+```
+
+---
