@@ -32,14 +32,26 @@ syossan27
 
 ---
 
-### In Go
+#### Simple Concurrency
+
+---
 
 ```
 func main() {
-  go func() {
-    fmt.Println("Hello Concurrency")
-  }()
+  for i := 0; i < 10; i++ {
+    go func() {
+      fmt.Println("Hello Concurrency")
+    }()
+  }
 }
 ```
+
+---
+
+This code is NOOP
+
+---
+
+#### Simple Bad Concurrency
 
 ---
