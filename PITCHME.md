@@ -157,11 +157,11 @@ Concurrencyでは考慮しなければならないことが多い👿
 
 ---
 
-### High-performance Concurrency is safety💪 
+### High-performance Concurrency = Safety💪 
 
 ---
 
-### Concurrency Pattern
+### Basic Concurrency Pattern
 
 - Confinement
 - Preventing Goroutine Leaks
@@ -210,6 +210,7 @@ for num := range handleData {
     fmt.Println(num)
 }
 ```
+@[1](mainからもloopDataからも参照出来てしまう)
 
 ---
 
@@ -240,6 +241,7 @@ for num := range handleData {
     fmt.Println(num)
 }
 ```
+@[3](データの参照範囲を明確にする)
 
 ---
 
@@ -259,7 +261,7 @@ goroutineがGCで解放されないパターンに対応する
 
 1. 処理の終了
 1. 回復不能なエラーの発生
-1. 処理の中止を受信
+1. 処理の停止
 
 1, 2はGCが動くが、3は動かない
 
@@ -273,11 +275,8 @@ goroutineがGCで解放されないパターンに対応する
 doWork := func(strings <-chan string) <-chan interface{} {
     completed := make(chan interface{})
     go func() {
-        defer fmt.Println("doWork exited.")
         defer close(completed)
-        for s := range strings {
-            fmt.Println(s)
-        }
+        for s := range strings { fmt.Println(s) }
     }()
     return completed
 }
@@ -304,25 +303,21 @@ doWork := func(
   done <-chan interface{},
   strings <-chan string,
 ) <-chan interface{} {
-    terminated := make(chan interface{})
+    completed := make(chan interface{})
     go func() {
-        defer fmt.Println("doWork exited.")
-        defer close(terminated)
+        defer close(completed)
         for {
             select {
-            case s := <-strings:
-                // Do something interesting
-                fmt.Println(s)
-            case <-done:
-                return
+            case s := <-strings: fmt.Println(s)
+            case <-done: return
             }
         }
     }()
-    return terminated
+    return completed
 }
 
 done := make(chan interface{})
-terminated := doWork(done, nil)
+completed := doWork(done, nil)
 
 go func() {
     time.Sleep(1 * time.Second)
@@ -330,8 +325,11 @@ go func() {
     close(done)
 }()
 
-<-terminated
+<-completed
 fmt.Println("Done.")
 ```
+@[2](処理の終了を知らせるchannel)
+@[11](処理が正常に終了)
+@[21-25](1s後に処理を終了させる)
 
 ---
