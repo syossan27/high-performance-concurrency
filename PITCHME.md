@@ -329,7 +329,25 @@ go func() {
 fmt.Println("Done.")
 ```
 @[2](処理の終了を知らせるchannel)
+@[21-25](mainから子goroutineへ処理の終了を伝える)
 @[11](処理が正常に終了)
-@[21-25](1s後に処理を終了させる)
+
+---
+
+### Digression
+
+GoのGCではgoroutineでヒープ領域に確保したメモリをOSに返さず、新しく生成されるgoroutineのために再利用しようとする性質があります。   
+そのため、 `pprof` や `runtime.MemStats` で確認した時に単純にメモリ使用量が減らないからメモリリークしている、という勘違いをしないよう注意しましょう。   
+真に確認するには `pprof` のスタックダンプや、 `leaktest` などのツールを使ったりするのが良いでしょう。
+
+---
+
+### Timeouts and Cancellation
+
+---
+
+### Merit by use Timeouts
+
+- リトライ
 
 ---
