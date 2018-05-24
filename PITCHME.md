@@ -148,6 +148,40 @@ Why?🤔
 
 ---
 
+```
+type value struct {
+    mu    sync.Mutex
+    value int
+}
+
+var wg sync.WaitGroup
+printSum := func(v1, v2 *value) {
+    defer wg.Done()
+
+    v1.mu.Lock()
+    defer v1.mu.Unlock()
+
+    time.Sleep(2 * time.Second)
+
+    v2.mu.Lock()
+    defer v2.mu.Unlock()
+
+    fmt.Printf("sum=%v\n", v1.value+v2.value)
+}
+
+var a, b value
+wg.Add(2)
+go printSum(&a, &b)
+go printSum(&b, &a)
+wg.Wait()
+```
+@[23-24](Matual Exclusion)
+@[10-16](Wait for Condition)
+@[21](No Preemption)
+@[23-24](Circular Wait)
+
+---
+
 ### Other
 
 - LiveLock
