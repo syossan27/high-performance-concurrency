@@ -425,7 +425,7 @@ func doWork(
 ```
 @[3](heartbeatの確認パルスを送る時間間隔を指定)
 @[5](heartbeat channelの作成)
-@[7](何かしら処理をする箇所をgoroutineで実行)
+@[7](何かしらの処理をgoroutineで実行)
 @[8](main関数でchannelを待てるようにheartbeat channelを返す)
 
 ---
@@ -510,5 +510,9 @@ func main() {
 @[6](doWork関数を動かしてheartbeat channelを得る)
 @[9](heartbeat channelから値を受け取り、心音を確認する)
 @[10-13](closeされたらokにfalseが入るので、そこで生死を判断する)
+
+---
+
+### タスク毎のHeartbeats
 
 ---
