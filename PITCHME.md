@@ -324,15 +324,11 @@ fmt.Println("Done.")
 
 ---
 
-### If long lifecycle application...
-
-😥
+### If long lifecycle application...😥
 
 ---
 
-### Implement parent goroutine manage child goroutine
-
-👪
+### Implement parent goroutine manage child goroutine👪
 
 ---
 
