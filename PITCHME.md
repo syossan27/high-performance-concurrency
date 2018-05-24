@@ -330,7 +330,7 @@ fmt.Println("Done.")
 
 ---
 
-### Parent goroutine manage child goroutine
+### Implement parent goroutine manage child goroutine
 
 ---
 
