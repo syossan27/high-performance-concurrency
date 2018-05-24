@@ -516,3 +516,106 @@ func main() {
 ### タスク毎のHeartbeats
 
 ---
+
+### 手順、登場人物はほぼ一緒
+
+---
+
+### doWork関数
+
+```
+func doWork(done <-chan interface{}) (<-chan interface{}, <-chan int) {
+  heartbeatStream := make(chan interface{}, 1)
+  workStream := make(chan int)
+  go work(heartbeatStream, workStream, done)
+  return heartbeatStream, workStream
+}
+```
+@[2](heartbeat channelの作成、resultが連続して表示されないようbufferを持たせる)
+@[7](何かしらの処理をgoroutineで実行)
+@[8](main関数でchannelを待てるようにheartbeat channelを返す)
+
+---
+
+### work関数
+
+```
+func work(
+	heartbeat chan interface{},
+	results chan time.Time,
+	pulseInterval time.Duration,
+	done <-chan interface{},
+) {
+	defer close(heartbeat)
+	defer close(results)
+
+	pulse := time.Tick(pulseInterval)
+	workGen := time.Tick(2 * pulseInterval)
+
+	for {
+		select {
+		case <-done:
+			return
+		case <-pulse:
+			sendPulse(heartbeat)
+		case r := <-workGen:
+			sendResult(r, done, pulse, heartbeat, results)
+		}
+	}
+}
+```
+@[10](確認パルスを送るchannelを作成)
+@[17-18](時間間隔ごとにsendPulseを動かし確認パルスを送る)
+@[7](work関数が死ぬ時にheartbeat channelも閉じる)
+
+---
+
+### sendPulse関数
+
+```
+func sendPulse(heartbeat chan interface{}) {
+	select {
+	case heartbeat <- struct{}{}:
+	default:
+	}
+}
+```
+@[3](heartbeat channelに値を入れる)
+@[4](heartbeat channelのバッファが満杯の時にblockingしないよう空defaultを添える)
+
+---
+
+### main関数
+
+```
+func main() {
+	done := make(chan interface{})
+	time.AfterFunc(10*time.Second, func() { close(done) })
+	const timeout = 2 * time.Second
+
+	heartbeat, results := doWork(done, timeout/2)
+	for {
+		select {
+		case _, ok := <-heartbeat:
+			if ok == false {
+				fmt.Println("心臓の鼓動が停止しました・・・")
+				return
+			}
+			fmt.Println("pulse")
+		case r, ok := <-results:
+			if ok == false {
+				return
+			}
+			fmt.Printf("results %v\n", r.Second())
+		case <-time.After(timeout):
+			fmt.Println("タイムアウトしました！")
+			return
+		}
+	}
+}
+```
+@[6](doWork関数を動かしてheartbeat channelを得る)
+@[9](heartbeat channelから値を受け取り、心音を確認する)
+@[10-13](closeされたらokにfalseが入るので、そこで生死を判断する)
+
+---

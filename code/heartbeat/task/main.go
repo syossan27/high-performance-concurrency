@@ -29,7 +29,7 @@ func main() {
 }
 
 func doWork(done <-chan interface{}) (<-chan interface{}, <-chan int) {
-	heartbeatStream := make(chan interface{}, 1)
+	heartbeatStream := make(chan interface{})
 	workStream := make(chan int)
 	go work(heartbeatStream, workStream, done)
 	return heartbeatStream, workStream
@@ -44,15 +44,18 @@ func work(
 	defer close(workStream)
 
 	for i := 0; i < 10; i++ {
-		select {
-		case heartbeatStream <- struct{}{}:
-		default:
-		}
+		sendPulse(heartbeatStream)
 
 		select {
 		case <-done:
 			return
 		case workStream <- rand.Intn(10):
 		}
+	}
+}
+
+func sendPulse(heartbeatStream chan interface{}) {
+	select {
+	case heartbeatStream <- struct{}{}:
 	}
 }
