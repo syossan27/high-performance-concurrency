@@ -122,6 +122,8 @@ go printSum(&a, &b)
 go printSum(&b, &a)
 wg.Wait()
 ```
+@[7-19](２値をロックしてから、足し算した結果を表示する)
+@[23-24](goroutineで２回動かしてみる)
 
 ---
 
