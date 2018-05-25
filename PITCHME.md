@@ -639,11 +639,3 @@ func main() {
 ---
 
 ![ConcurrencyInGo](assets/images/concurrency_in_go.jpg)
-
-Concurrency In Go
-
-4,397円
-
-和訳版無し
-
-好評発売中！！
