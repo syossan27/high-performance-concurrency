@@ -616,3 +616,22 @@ func main() {
 大事なのは「子goroutineの状態を親が知る術がある」ということ。
 
 ---
+
+### まだまだ大事な話は沢山ある
+
+---
+
+- Replicate Request
+- Rate Limit
+- Healing Unhealthy Goroutines
+- Pipeline
+- Error Propagation
+- etc...etc...
+
+---
+
+### この先はキミの目で確かめてくれ！
+
+---
+
+![ConcurrencyInGo](assets/images/concurrency_in_go.jpg)
