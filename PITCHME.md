@@ -4,6 +4,12 @@ syossan27
 
 ---
 
+### Today code
+
+https://github.com/syossan27/high-performance-concurrency
+
+---
+
 ### Concurrency is ... ?
 
 ---
@@ -127,9 +133,7 @@ wg.Wait()
 
 ---
 
-```
 fatal error: all goroutines are asleep - deadlock!
-```
 
 ---
 
