@@ -531,9 +531,9 @@ func doWork(done <-chan interface{}) (<-chan interface{}, <-chan int) {
   return heartbeatStream, workStream
 }
 ```
-@[2](heartbeat channelの作成、resultが連続して表示されないようbufferを持たせる)
-@[7](何かしらの処理をgoroutineで実行)
-@[8](main関数でchannelを待てるようにheartbeat channelを返す)
+@[2](heartbeat channelの作成、sendPulseが遅延した場合を考慮しbufferを持たせる)
+@[4](何かしらの処理をgoroutineで実行)
+@[5](main関数でchannelを待てるようにheartbeat channelを返す)
 
 ---
 
@@ -541,47 +541,33 @@ func doWork(done <-chan interface{}) (<-chan interface{}, <-chan int) {
 
 ```
 func work(
-	heartbeat chan interface{},
-	results chan time.Time,
-	pulseInterval time.Duration,
+	heartbeatStream chan interface{},
+	workStream chan int,
 	done <-chan interface{},
 ) {
-	defer close(heartbeat)
-	defer close(results)
+	defer close(heartbeatStream)
+	defer close(workStream)
 
-	pulse := time.Tick(pulseInterval)
-	workGen := time.Tick(2 * pulseInterval)
+	for i := 0; i < 10; i++ {
+		sendPulse(heartbeatStream)
 
-	for {
 		select {
 		case <-done:
 			return
-		case <-pulse:
-			sendPulse(heartbeat)
-		case r := <-workGen:
-			sendResult(r, done, pulse, heartbeat, results)
+		case workStream <- rand.Intn(10):
 		}
 	}
 }
 ```
-@[10](確認パルスを送るchannelを作成)
-@[17-18](時間間隔ごとにsendPulseを動かし確認パルスを送る)
-@[7](work関数が死ぬ時にheartbeat channelも閉じる)
+@[9-17](10個分のタスクを実行)
+@[10](タスクごとにsendPulseを動かし確認パルスを送る)
+@[15](処理結果をworkStreamに送る)
 
 ---
 
 ### sendPulse関数
 
-```
-func sendPulse(heartbeat chan interface{}) {
-	select {
-	case heartbeat <- struct{}{}:
-	default:
-	}
-}
-```
-@[3](heartbeat channelに値を入れる)
-@[4](heartbeat channelのバッファが満杯の時にblockingしないよう空defaultを添える)
+一緒
 
 ---
 
@@ -590,10 +576,9 @@ func sendPulse(heartbeat chan interface{}) {
 ```
 func main() {
 	done := make(chan interface{})
-	time.AfterFunc(10*time.Second, func() { close(done) })
-	const timeout = 2 * time.Second
+	defer close(done)
 
-	heartbeat, results := doWork(done, timeout/2)
+	heartbeat, results := doWork(done)
 	for {
 		select {
 		case _, ok := <-heartbeat:
@@ -603,19 +588,31 @@ func main() {
 			}
 			fmt.Println("pulse")
 		case r, ok := <-results:
-			if ok == false {
+			if ok {
+				fmt.Printf("results %v\n", r)
+			} else {
 				return
 			}
-			fmt.Printf("results %v\n", r.Second())
-		case <-time.After(timeout):
-			fmt.Println("タイムアウトしました！")
-			return
 		}
 	}
 }
 ```
-@[6](doWork関数を動かしてheartbeat channelを得る)
-@[9](heartbeat channelから値を受け取り、心音を確認する)
-@[10-13](closeされたらokにfalseが入るので、そこで生死を判断する)
+@[5](doWork関数を動かしてheartbeat channelを得る)
+@[8](heartbeat channelから値を受け取り、心音を確認する)
+@[9](closeされたらokにfalseが入るので、そこで生死を判断する)
+
+---
+
+### 使い分け
+
+- 周期的なHeartbeats：イベント駆動で処理を開始するような待機型の並行処理に有効
+- タスク毎のHeartbeats：goroutineが処理を開始したことだけ確認したい場合に有効
+
+--- 
+
+### 正直これだけだと使い物にならなくない？
+
+その通り。goroutineを蘇生させたりするのに使ったりすることで輝きます。   
+大事なのは「子goroutineの状態を親が知る術がある」ということ。
 
 ---
