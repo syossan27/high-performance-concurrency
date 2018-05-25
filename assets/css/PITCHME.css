@@ -64,3 +64,7 @@
 .reveal .slides section .code-presenting-annotation {
   color: gray;
 }
+
+body > div.reveal.none.center.has-horizontal-slides.ready > div.slides > section.present > p > span.code-presenting-annotation.fragment.current-only.visible.current-fragment {
+  font-size: 80% !important;
+}
