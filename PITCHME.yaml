@@ -2,8 +2,6 @@ theme : night
 
 layout : center-left
 
-logo : assets/logo.png
-
 theme-override : assets/css/PITCHME.css
 
 transition : none
